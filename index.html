@@ -544,22 +544,24 @@ create policy "own backup update" on public.backups for update using (auth.uid()
           <input type="text" id="sb-anon-key" placeholder="eyJhbGciOi...">
         </div>
       </div>
-      <div class="field-row" style="margin-top:8px;">
-        <div class="field" style="flex:1; min-width:180px;">
-          <label for="sb-email">Email</label>
-          <input type="email" id="sb-email" placeholder="usaha-anda@email.com">
+      <form id="sb-auth-form" autocomplete="on" style="margin:0;">
+        <div class="field-row" style="margin-top:8px;" id="sb-login-fields">
+          <div class="field" style="flex:1; min-width:180px;">
+            <label for="sb-email">Email</label>
+            <input type="email" id="sb-email" name="email" autocomplete="username" placeholder="usaha-anda@email.com">
+          </div>
+          <div class="field" style="flex:1; min-width:180px;">
+            <label for="sb-password">Kata Sandi</label>
+            <input type="password" id="sb-password" name="password" autocomplete="current-password" placeholder="Minimal 6 karakter">
+          </div>
         </div>
-        <div class="field" style="flex:1; min-width:180px;">
-          <label for="sb-password">Kata Sandi</label>
-          <input type="password" id="sb-password" placeholder="Minimal 6 karakter">
+        <div class="btn-row" style="margin-top:10px;">
+          <button type="submit" class="btn btn-ghost" id="sb-connect-btn">🔗 Masuk / Daftar</button>
+          <button type="button" class="btn btn-primary" onclick="sbSave()">☁⬆ Simpan ke Supabase</button>
+          <button type="button" class="btn btn-ghost" onclick="sbLoad()">☁⬇ Muat dari Supabase</button>
+          <button type="button" class="btn btn-ghost" id="sb-logout-btn" onclick="sbLogout()" style="display:none;">Keluar</button>
         </div>
-      </div>
-      <div class="btn-row" style="margin-top:10px;">
-        <button class="btn btn-ghost" onclick="sbConnect()">🔗 Masuk / Daftar</button>
-        <button class="btn btn-primary" onclick="sbSave()">☁⬆ Simpan ke Supabase</button>
-        <button class="btn btn-ghost" onclick="sbLoad()">☁⬇ Muat dari Supabase</button>
-        <button class="btn btn-ghost" onclick="sbLogout()">Keluar</button>
-      </div>
+      </form>
       <div class="hint" id="sb-status" style="margin-top:8px;">Belum tersambung.</div>
     </div>
 
@@ -1248,7 +1250,8 @@ create policy "own backup update" on public.backups for update using (auth.uid()
     }).then(function(res){ return res.json().then(function(body){ return { ok: res.ok, body: body }; }); });
   }
 
-  function sbConnect(){
+  function sbConnect(evt){
+    if(evt && evt.preventDefault) evt.preventDefault();
     var cfg = sbGetConfig();
     var email = (document.getElementById('sb-email').value || '').trim();
     var password = document.getElementById('sb-password').value || '';
@@ -1346,12 +1349,20 @@ create policy "own backup update" on public.backups for update using (auth.uid()
 
   function sbLogout(){
     sbClearSession();
+    var pwField = document.getElementById('sb-password');
+    if(pwField) pwField.value = '';
     sbUpdateStatus(false);
     showToast('Keluar dari akun Supabase di perangkat ini.');
   }
 
   function sbUpdateStatus(connected){
     var el = document.getElementById('sb-status');
+    var loginFields = document.getElementById('sb-login-fields');
+    var connectBtn = document.getElementById('sb-connect-btn');
+    var logoutBtn = document.getElementById('sb-logout-btn');
+    if(loginFields) loginFields.style.display = connected ? 'none' : 'flex';
+    if(connectBtn) connectBtn.style.display = connected ? 'none' : '';
+    if(logoutBtn) logoutBtn.style.display = connected ? '' : 'none';
     if(!el) return;
     var last = localStorage.getItem('sb_last_sync');
     if(connected){
@@ -1414,6 +1425,8 @@ create policy "own backup update" on public.backups for update using (auth.uid()
     if(savedEmail){ document.getElementById('sb-email').value = savedEmail; }
     sbRestoreSession();
     sbUpdateStatus(!!(sbAccessToken && sbUserId));
+    var authForm = document.getElementById('sb-auth-form');
+    if(authForm) authForm.addEventListener('submit', sbConnect);
   })();
 
   // ---------- PWA: daftarkan service worker agar bisa diinstal & dipakai offline ----------
