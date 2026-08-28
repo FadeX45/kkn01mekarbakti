@@ -1,6 +1,6 @@
 // Service worker sederhana: cache semua aset saat install,
 // lalu sajikan dari cache saat offline (cache-first).
-var CACHE_NAME = 'buku-kas-umkm-v3';
+var CACHE_NAME = 'buku-kas-umkm-v4';
 var ASSETS = [
   './',
   './index.html',
@@ -31,8 +31,8 @@ self.addEventListener('activate', function(event){
 
 self.addEventListener('fetch', function(event){
   if(event.request.method !== 'GET') return;
-  // Jangan cache permintaan lintas domain (mis. Google Sign-In & Drive API)
-  // agar fitur cadangan Google Drive selalu memakai data/izin terbaru.
+  // Jangan cache permintaan lintas domain (mis. Supabase Auth & REST API)
+  // agar fitur cadangan Supabase selalu memakai data/izin terbaru.
   if(new URL(event.request.url).origin !== self.location.origin) return;
   event.respondWith(
     caches.match(event.request).then(function(cached){

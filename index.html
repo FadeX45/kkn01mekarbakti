@@ -514,29 +514,53 @@
     </div>
 
     <div class="card no-print">
-      <h2><span class="idx">↳</span>Cadangan Google Drive</h2>
-      <div class="hint" id="gdrive-help-hint" style="margin-top:-4px;">
-        Simpan cadangan data ke akun Google Drive Anda sendiri sehingga bisa dibuka lagi dari HP/perangkat lain. Perlu koneksi internet dan sekali pengaturan Client ID Google (gratis). <a href="#" onclick="toggleGDriveHelp(); return false;" id="gdrive-help-toggle">Lihat cara membuat Client ID ▾</a>
+      <h2><span class="idx">↳</span>Cadangan Supabase</h2>
+      <div class="hint" id="sb-help-hint" style="margin-top:-4px;">
+        Simpan cadangan data ke akun Supabase Anda sendiri sehingga bisa dibuka lagi dari HP/perangkat lain. Perlu koneksi internet dan sekali pengaturan project Supabase (gratis). <a href="#" onclick="toggleSBHelp(); return false;" id="sb-help-toggle">Lihat cara mengaturnya ▾</a>
       </div>
-      <div id="gdrive-help-box" style="display:none; font-size:12.5px; color:var(--ink-light); line-height:1.6; background:var(--paper); border:1px solid var(--line-soft); border-radius:8px; padding:10px 12px; margin-top:8px;">
-        1. Buka <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Google Cloud Console → Credentials</a>, buat project baru (gratis).<br>
-        2. Aktifkan <b>Google Drive API</b> di menu "Enabled APIs".<br>
-        3. Buat <b>OAuth Client ID</b> jenis <b>Web application</b>. Pada "Authorized JavaScript origins", isi alamat tempat aplikasi ini dibuka (mis. <code>https://namaanda.github.io</code>). Aplikasi harus diakses lewat <b>https://</b>, bukan dibuka langsung dari file di HP.<br>
-        4. Salin <b>Client ID</b> yang dihasilkan (akhiran <code>.apps.googleusercontent.com</code>), tempel di kolom bawah ini.<br>
-        5. Klik "Hubungkan Akun Google", lalu izinkan aksesnya. Data disimpan tersembunyi khusus untuk aplikasi ini (tidak akan terlihat di folder Drive biasa).
+      <div id="sb-help-box" style="display:none; font-size:12.5px; color:var(--ink-light); line-height:1.6; background:var(--paper); border:1px solid var(--line-soft); border-radius:8px; padding:10px 12px; margin-top:8px;">
+        1. Buka <a href="https://supabase.com" target="_blank" rel="noopener">supabase.com</a>, buat akun &amp; project baru (gratis).<br>
+        2. Buka menu <b>SQL Editor</b> di project Anda, tempel &amp; jalankan perintah berikut untuk membuat tabel cadangan:
+        <pre style="white-space:pre-wrap; background:#fff; border:1px solid var(--line-soft); border-radius:6px; padding:8px; margin:6px 0; font-size:11px; overflow-x:auto;">create table public.backups (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  data jsonb not null,
+  updated_at timestamptz not null default now()
+);
+alter table public.backups enable row level security;
+create policy "own backup select" on public.backups for select using (auth.uid() = user_id);
+create policy "own backup insert" on public.backups for insert with check (auth.uid() = user_id);
+create policy "own backup update" on public.backups for update using (auth.uid() = user_id);</pre>
+        3. Buka menu <b>Authentication → Providers → Email</b>, matikan "Confirm email" agar bisa langsung masuk tanpa verifikasi email (opsional, bisa dinyalakan lagi kapan saja).<br>
+        4. Buka menu <b>Project Settings → API</b>, salin <b>Project URL</b> dan <b>anon public key</b>, tempel di kolom bawah ini.<br>
+        5. Isi email &amp; kata sandi bebas (khusus untuk aplikasi ini), lalu klik "Masuk / Daftar". Data hanya bisa diakses oleh akun tersebut.
       </div>
       <div class="field-row" style="margin-top:12px;">
         <div class="field" style="flex:2; min-width:220px;">
-          <label for="gdrive-client-id">Google Client ID</label>
-          <input type="text" id="gdrive-client-id" placeholder="xxxxxxxxxx.apps.googleusercontent.com">
+          <label for="sb-url">Supabase Project URL</label>
+          <input type="text" id="sb-url" placeholder="https://xxxxxxxx.supabase.co">
+        </div>
+        <div class="field" style="flex:2; min-width:220px;">
+          <label for="sb-anon-key">Supabase Anon Key</label>
+          <input type="text" id="sb-anon-key" placeholder="eyJhbGciOi...">
+        </div>
+      </div>
+      <div class="field-row" style="margin-top:8px;">
+        <div class="field" style="flex:1; min-width:180px;">
+          <label for="sb-email">Email</label>
+          <input type="email" id="sb-email" placeholder="usaha-anda@email.com">
+        </div>
+        <div class="field" style="flex:1; min-width:180px;">
+          <label for="sb-password">Kata Sandi</label>
+          <input type="password" id="sb-password" placeholder="Minimal 6 karakter">
         </div>
       </div>
       <div class="btn-row" style="margin-top:10px;">
-        <button class="btn btn-ghost" onclick="gdriveConnect()">🔗 Hubungkan Akun Google</button>
-        <button class="btn btn-primary" onclick="gdriveSave()">☁⬆ Simpan ke Google Drive</button>
-        <button class="btn btn-ghost" onclick="gdriveLoad()">☁⬇ Muat dari Google Drive</button>
+        <button class="btn btn-ghost" onclick="sbConnect()">🔗 Masuk / Daftar</button>
+        <button class="btn btn-primary" onclick="sbSave()">☁⬆ Simpan ke Supabase</button>
+        <button class="btn btn-ghost" onclick="sbLoad()">☁⬇ Muat dari Supabase</button>
+        <button class="btn btn-ghost" onclick="sbLogout()">Keluar</button>
       </div>
-      <div class="hint" id="gdrive-status" style="margin-top:8px;">Belum tersambung.</div>
+      <div class="hint" id="sb-status" style="margin-top:8px;">Belum tersambung.</div>
     </div>
 
     <div class="card no-print">
@@ -1162,165 +1186,178 @@
     showToast('Semua data telah dihapus.');
   }
 
-  // ---------- Google Drive Backup ----------
-  var GDRIVE_FILENAME = 'buku-kas-umkm-backup.json';
-  var gdriveAccessToken = null;
-  var gdriveTokenClient = null;
+  // ---------- Supabase Backup ----------
+  var SB_TABLE = 'backups';
+  var sbAccessToken = null;
+  var sbRefreshToken = null;
+  var sbUserId = null;
 
-  function toggleGDriveHelp(){
-    var box = document.getElementById('gdrive-help-box');
-    var toggle = document.getElementById('gdrive-help-toggle');
+  function toggleSBHelp(){
+    var box = document.getElementById('sb-help-box');
+    var toggle = document.getElementById('sb-help-toggle');
     var open = box.style.display !== 'none';
     box.style.display = open ? 'none' : 'block';
-    toggle.textContent = open ? 'Lihat cara membuat Client ID ▾' : 'Sembunyikan ▴';
+    toggle.textContent = open ? 'Lihat cara mengaturnya ▾' : 'Sembunyikan ▴';
   }
 
-  function gdriveLoadGis(){
-    return new Promise(function(resolve, reject){
-      if(window.google && google.accounts && google.accounts.oauth2){ resolve(); return; }
-      var s = document.createElement('script');
-      s.src = 'https://accounts.google.com/gsi/client';
-      s.onload = function(){ resolve(); };
-      s.onerror = function(){ reject('load-failed'); };
-      document.head.appendChild(s);
-    });
+  function sbGetConfig(){
+    var urlInput = document.getElementById('sb-url');
+    var keyInput = document.getElementById('sb-anon-key');
+    var url = urlInput ? urlInput.value.trim().replace(/\/+$/, '') : '';
+    var key = keyInput ? keyInput.value.trim() : '';
+    if(url) localStorage.setItem('sb_url', url);
+    if(key) localStorage.setItem('sb_anon_key', key);
+    return { url: url || localStorage.getItem('sb_url') || '', key: key || localStorage.getItem('sb_anon_key') || '' };
   }
 
-  function gdriveGetClientId(){
-    var input = document.getElementById('gdrive-client-id');
-    var id = input ? input.value.trim() : '';
-    if(id) localStorage.setItem('gdrive_client_id', id);
-    return id || localStorage.getItem('gdrive_client_id') || '';
+  function sbRestoreSession(){
+    sbAccessToken = localStorage.getItem('sb_access_token') || null;
+    sbRefreshToken = localStorage.getItem('sb_refresh_token') || null;
+    sbUserId = localStorage.getItem('sb_user_id') || null;
   }
 
-  function gdriveConnect(){
-    var clientId = gdriveGetClientId();
-    if(!clientId){ showToast('Isi Google Client ID terlebih dahulu (lihat panduan di atas).'); return; }
-    gdriveLoadGis().then(function(){
-      gdriveTokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
-        scope: 'https://www.googleapis.com/auth/drive.appdata',
-        callback: function(resp){
-          if(resp.error){ showToast('Gagal menyambung ke Google: ' + resp.error); return; }
-          gdriveAccessToken = resp.access_token;
-          gdriveUpdateStatus(true);
-          showToast('Berhasil tersambung ke Google Drive.');
+  function sbSaveSession(session){
+    sbAccessToken = session.access_token;
+    sbRefreshToken = session.refresh_token || null;
+    sbUserId = session.user && session.user.id;
+    localStorage.setItem('sb_access_token', sbAccessToken || '');
+    localStorage.setItem('sb_refresh_token', sbRefreshToken || '');
+    localStorage.setItem('sb_user_id', sbUserId || '');
+  }
+
+  function sbClearSession(){
+    sbAccessToken = null; sbRefreshToken = null; sbUserId = null;
+    localStorage.removeItem('sb_access_token');
+    localStorage.removeItem('sb_refresh_token');
+    localStorage.removeItem('sb_user_id');
+  }
+
+  function sbSignIn(cfg, email, password){
+    return fetch(cfg.url + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { 'apikey': cfg.key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: password })
+    }).then(function(res){ return res.json().then(function(body){ return { ok: res.ok, body: body }; }); });
+  }
+
+  function sbSignUp(cfg, email, password){
+    return fetch(cfg.url + '/auth/v1/signup', {
+      method: 'POST',
+      headers: { 'apikey': cfg.key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: password })
+    }).then(function(res){ return res.json().then(function(body){ return { ok: res.ok, body: body }; }); });
+  }
+
+  function sbConnect(){
+    var cfg = sbGetConfig();
+    var email = (document.getElementById('sb-email').value || '').trim();
+    var password = document.getElementById('sb-password').value || '';
+    if(!cfg.url || !cfg.key){ showToast('Isi Supabase Project URL dan Anon Key terlebih dahulu (lihat panduan di atas).'); return; }
+    if(!email || !password){ showToast('Isi email dan kata sandi terlebih dahulu.'); return; }
+    localStorage.setItem('sb_email', email);
+    sbSignIn(cfg, email, password).then(function(res){
+      if(res.ok && res.body.access_token){
+        sbSaveSession(res.body);
+        sbUpdateStatus(true);
+        showToast('Berhasil masuk ke Supabase.');
+        return;
+      }
+      // Kemungkinan akun belum terdaftar -> coba daftarkan
+      return sbSignUp(cfg, email, password).then(function(res2){
+        if(res2.ok && res2.body.access_token){
+          sbSaveSession(res2.body);
+          sbUpdateStatus(true);
+          showToast('Akun berhasil dibuat & tersambung ke Supabase.');
+        } else if(res2.ok){
+          showToast('Akun dibuat. Jika verifikasi email masih aktif, cek email lalu klik "Masuk / Daftar" lagi. Atau matikan "Confirm email" di Supabase → Authentication → Providers.');
+        } else {
+          var msg = res2.body && (res2.body.msg || res2.body.error_description || res2.body.error) || 'Periksa Project URL, Anon Key, dan koneksi internet.';
+          showToast('Gagal masuk/daftar: ' + msg);
         }
       });
-      gdriveTokenClient.requestAccessToken({ prompt: 'consent' });
-    }).catch(function(){
-      showToast('Gagal memuat layanan Google. Periksa koneksi internet Anda.');
-    });
-  }
-
-  function gdriveEnsureToken(){
-    return new Promise(function(resolve, reject){
-      if(gdriveAccessToken){ resolve(); return; }
-      var clientId = gdriveGetClientId();
-      if(!clientId){ reject('no-client-id'); return; }
-      gdriveLoadGis().then(function(){
-        gdriveTokenClient = google.accounts.oauth2.initTokenClient({
-          client_id: clientId,
-          scope: 'https://www.googleapis.com/auth/drive.appdata',
-          callback: function(resp){
-            if(resp.error){ reject(resp.error); return; }
-            gdriveAccessToken = resp.access_token;
-            gdriveUpdateStatus(true);
-            resolve();
-          }
-        });
-        gdriveTokenClient.requestAccessToken({ prompt: '' });
-      }).catch(function(){ reject('load-failed'); });
-    });
-  }
-
-  function gdriveFindFile(){
-    var q = "name='" + GDRIVE_FILENAME + "' and trashed=false";
-    return fetch('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&fields=files(id,modifiedTime)&q=' + encodeURIComponent(q), {
-      headers: { 'Authorization': 'Bearer ' + gdriveAccessToken }
-    }).then(function(res){
-      if(!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json();
-    }).then(function(data){
-      return (data.files && data.files.length) ? data.files[0] : null;
-    });
-  }
-
-  function gdriveSave(){
-    gdriveEnsureToken().then(function(){
-      var payload = { exportedAt: new Date().toISOString(), kas: state.kas, piutang: state.piutang, hutang: state.hutang };
-      var content = JSON.stringify(payload);
-      return gdriveFindFile().then(function(existing){
-        if(existing){
-          return fetch('https://www.googleapis.com/upload/drive/v3/files/' + existing.id + '?uploadType=media', {
-            method: 'PATCH',
-            headers: { 'Authorization': 'Bearer ' + gdriveAccessToken, 'Content-Type': 'application/json' },
-            body: content
-          });
-        }
-        var boundary = 'umkmkasbatas';
-        var metadata = { name: GDRIVE_FILENAME, parents: ['appDataFolder'] };
-        var body =
-          '--' + boundary + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) + '\r\n' +
-          '--' + boundary + '\r\nContent-Type: application/json\r\n\r\n' + content + '\r\n' +
-          '--' + boundary + '--';
-        return fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + gdriveAccessToken, 'Content-Type': 'multipart/related; boundary=' + boundary },
-          body: body
-        });
-      });
-    }).then(function(res){
-      if(!res.ok) throw new Error('HTTP ' + res.status);
-      localStorage.setItem('gdrive_last_sync', new Date().toISOString());
-      gdriveUpdateStatus(true);
-      showToast('Data berhasil disimpan ke Google Drive.');
     }).catch(function(err){
-      if(err === 'no-client-id'){ showToast('Isi Google Client ID lalu hubungkan akun terlebih dahulu.'); }
-      else { showToast('Gagal menyimpan ke Google Drive. Coba hubungkan ulang akun.'); }
-      console.error('gdriveSave error:', err);
+      showToast('Gagal menyambung ke Supabase. Periksa Project URL, Anon Key, dan koneksi internet.');
+      console.error('sbConnect error:', err);
     });
   }
 
-  function gdriveLoad(){
-    var fileInfo = null;
-    gdriveEnsureToken().then(function(){
-      return gdriveFindFile();
-    }).then(function(file){
-      if(!file){ showToast('Belum ada cadangan tersimpan di Google Drive.'); return null; }
-      fileInfo = file;
-      return fetch('https://www.googleapis.com/drive/v3/files/' + file.id + '?alt=media', {
-        headers: { 'Authorization': 'Bearer ' + gdriveAccessToken }
+  function sbEnsureToken(){
+    return new Promise(function(resolve, reject){
+      var cfg = sbGetConfig();
+      if(!cfg.url || !cfg.key){ reject('no-config'); return; }
+      if(sbAccessToken && sbUserId){ resolve(cfg); return; }
+      reject('not-signed-in');
+    });
+  }
+
+  function sbSave(){
+    var cfgRef = null;
+    sbEnsureToken().then(function(cfg){
+      cfgRef = cfg;
+      var payload = { exportedAt: new Date().toISOString(), kas: state.kas, piutang: state.piutang, hutang: state.hutang };
+      return fetch(cfg.url + '/rest/v1/' + SB_TABLE, {
+        method: 'POST',
+        headers: {
+          'apikey': cfg.key,
+          'Authorization': 'Bearer ' + sbAccessToken,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates,return=minimal'
+        },
+        body: JSON.stringify({ user_id: sbUserId, data: payload, updated_at: new Date().toISOString() })
+      });
+    }).then(function(res){
+      if(!res.ok) return res.text().then(function(t){ throw new Error('HTTP ' + res.status + ': ' + t); });
+      localStorage.setItem('sb_last_sync', new Date().toISOString());
+      sbUpdateStatus(true);
+      showToast('Data berhasil disimpan ke Supabase.');
+    }).catch(function(err){
+      if(err === 'no-config'){ showToast('Isi Supabase Project URL & Anon Key terlebih dahulu.'); }
+      else if(err === 'not-signed-in'){ showToast('Masuk ke akun Supabase terlebih dahulu.'); }
+      else { showToast('Gagal menyimpan ke Supabase. Pastikan tabel & kebijakan RLS sudah dibuat, lalu coba masuk ulang.'); console.error('sbSave error:', err); }
+    });
+  }
+
+  function sbLoad(){
+    sbEnsureToken().then(function(cfg){
+      return fetch(cfg.url + '/rest/v1/' + SB_TABLE + '?user_id=eq.' + encodeURIComponent(sbUserId) + '&select=data,updated_at', {
+        headers: { 'apikey': cfg.key, 'Authorization': 'Bearer ' + sbAccessToken }
       }).then(function(res){
-        if(!res.ok) throw new Error('HTTP ' + res.status);
+        if(!res.ok) return res.text().then(function(t){ throw new Error('HTTP ' + res.status + ': ' + t); });
         return res.json();
       });
-    }).then(function(data){
-      if(!data) return;
-      if(!confirm('Muat cadangan dari Google Drive (disimpan ' + fmtDate((fileInfo.modifiedTime||'').slice(0,10)) + ') akan menggantikan data saat ini di aplikasi. Lanjutkan?')) return;
+    }).then(function(rows){
+      if(!rows || !rows.length){ showToast('Belum ada cadangan tersimpan di Supabase.'); return; }
+      var row = rows[0];
+      var data = row.data || {};
+      if(!confirm('Muat cadangan dari Supabase (disimpan ' + fmtDate((row.updated_at||'').slice(0,10)) + ') akan menggantikan data saat ini di aplikasi. Lanjutkan?')) return;
       state.kas = Array.isArray(data.kas) ? data.kas : [];
       state.piutang = Array.isArray(data.piutang) ? data.piutang : [];
       state.hutang = Array.isArray(data.hutang) ? data.hutang : [];
       cancelEditKas(); cancelEditPiutang(); cancelEditHutang();
       saveAll();
       renderKas(); renderPiutang(); renderHutang(); renderRingkasan();
-      showToast('Data berhasil dimuat dari Google Drive.');
+      showToast('Data berhasil dimuat dari Supabase.');
     }).catch(function(err){
-      if(err === 'no-client-id'){ showToast('Isi Google Client ID lalu hubungkan akun terlebih dahulu.'); }
-      else { showToast('Gagal memuat dari Google Drive. Coba hubungkan ulang akun.'); }
-      console.error('gdriveLoad error:', err);
+      if(err === 'no-config'){ showToast('Isi Supabase Project URL & Anon Key terlebih dahulu.'); }
+      else if(err === 'not-signed-in'){ showToast('Masuk ke akun Supabase terlebih dahulu.'); }
+      else { showToast('Gagal memuat dari Supabase. Coba masuk ulang.'); console.error('sbLoad error:', err); }
     });
   }
 
-  function gdriveUpdateStatus(connected){
-    var el = document.getElementById('gdrive-status');
+  function sbLogout(){
+    sbClearSession();
+    sbUpdateStatus(false);
+    showToast('Keluar dari akun Supabase di perangkat ini.');
+  }
+
+  function sbUpdateStatus(connected){
+    var el = document.getElementById('sb-status');
     if(!el) return;
+    var last = localStorage.getItem('sb_last_sync');
     if(connected){
-      var last = localStorage.getItem('gdrive_last_sync');
       el.textContent = 'Tersambung ✓' + (last ? (' • Terakhir disimpan: ' + new Date(last).toLocaleString('id-ID')) : ' • Belum pernah disimpan.');
     } else {
-      var last2 = localStorage.getItem('gdrive_last_sync');
-      el.textContent = 'Belum tersambung.' + (last2 ? (' Terakhir disimpan: ' + new Date(last2).toLocaleString('id-ID')) : '');
+      el.textContent = 'Belum tersambung.' + (last ? (' Terakhir disimpan: ' + new Date(last).toLocaleString('id-ID')) : '');
     }
   }
 
@@ -1369,9 +1406,14 @@
   renderHutang();
   renderRingkasan();
   (function(){
-    var savedClientId = localStorage.getItem('gdrive_client_id');
-    if(savedClientId){ document.getElementById('gdrive-client-id').value = savedClientId; }
-    gdriveUpdateStatus(false);
+    var savedUrl = localStorage.getItem('sb_url');
+    var savedKey = localStorage.getItem('sb_anon_key');
+    var savedEmail = localStorage.getItem('sb_email');
+    if(savedUrl){ document.getElementById('sb-url').value = savedUrl; }
+    if(savedKey){ document.getElementById('sb-anon-key').value = savedKey; }
+    if(savedEmail){ document.getElementById('sb-email').value = savedEmail; }
+    sbRestoreSession();
+    sbUpdateStatus(!!(sbAccessToken && sbUserId));
   })();
 
   // ---------- PWA: daftarkan service worker agar bisa diinstal & dipakai offline ----------

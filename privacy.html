@@ -20,13 +20,14 @@
   <h2>Data apa yang disimpan?</h2>
   <p>Seluruh data transaksi (kas, piutang, hutang) yang Anda masukkan disimpan secara lokal di penyimpanan browser perangkat Anda (localStorage). Data ini tidak dikirim ke server pihak ketiga mana pun oleh aplikasi ini.</p>
 
-  <h2>Fitur Cadangan Google Drive (opsional)</h2>
-  <p>Jika Anda memilih untuk menghubungkan akun Google dan menggunakan fitur "Simpan ke Google Drive", aplikasi akan meminta izin akses terbatas ke folder data aplikasi tersembunyi (App Data Folder) di akun Google Drive Anda sendiri, khusus untuk menyimpan satu file cadangan data transaksi Anda.</p>
+  <h2>Fitur Cadangan Supabase (opsional)</h2>
+  <p>Jika Anda memilih untuk mengatur dan menghubungkan project Supabase milik Anda sendiri lalu menggunakan fitur "Simpan ke Supabase", aplikasi akan mengirim data transaksi Anda ke database Supabase pada project tersebut, khusus untuk menyimpan satu cadangan data yang terhubung dengan akun (email) yang Anda buat.</p>
   <ul>
-    <li>Aplikasi hanya dapat membaca/menulis file cadangannya sendiri di App Data Folder — tidak dapat mengakses file atau folder lain di Google Drive Anda.</li>
-    <li>Data yang disimpan ke Google Drive sama persis dengan data yang Anda masukkan sendiri ke aplikasi (kas, piutang, hutang).</li>
-    <li>Aplikasi tidak membagikan data Anda kepada pihak ketiga mana pun.</li>
-    <li>Anda dapat memutus akses ini kapan saja melalui halaman <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">Google Account &rarr; Security &rarr; Third-party access</a>.</li>
+    <li>Project URL, Anon Key, email, dan kata sandi yang Anda isi disimpan secara lokal di perangkat Anda (localStorage) agar tidak perlu diisi ulang; aplikasi ini tidak mengirimkannya ke pihak mana pun selain project Supabase Anda sendiri.</li>
+    <li>Dengan pengaturan kebijakan akses (Row Level Security) sesuai panduan dalam aplikasi, data cadangan hanya dapat diakses oleh akun yang Anda buat sendiri di project Supabase tersebut.</li>
+    <li>Data yang disimpan ke Supabase sama persis dengan data yang Anda masukkan sendiri ke aplikasi (kas, piutang, hutang).</li>
+    <li>Aplikasi tidak membagikan data Anda kepada pihak ketiga mana pun di luar project Supabase yang Anda kelola sendiri.</li>
+    <li>Anda dapat menghapus data cadangan atau seluruh project Supabase kapan saja melalui dasbor Supabase Anda, dan dapat memutus koneksi di perangkat ini melalui tombol "Keluar" pada aplikasi.</li>
   </ul>
 
   <h2>Kontak</h2>
