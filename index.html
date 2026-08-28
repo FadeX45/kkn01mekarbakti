@@ -514,9 +514,9 @@
     </div>
 
     <div class="card no-print">
-      <h2><span class="idx">↳</span>Cadangan Supabase</h2>
+      <h2><span class="idx">↳</span>Cadangan Cloud</h2>
       <div class="hint" id="sb-help-hint" style="margin-top:-4px;">
-        Simpan cadangan data ke akun Supabase Anda sendiri sehingga bisa dibuka lagi dari HP/perangkat lain. Perlu koneksi internet dan sekali pengaturan project Supabase (gratis). <a href="#" onclick="toggleSBHelp(); return false;" id="sb-help-toggle">Lihat cara mengaturnya ▾</a>
+        Simpan cadangan data ke akun Cloud Anda sendiri sehingga bisa dibuka lagi dari HP/perangkat lain. Perlu koneksi internet dan sekali pengaturan project Supabase (gratis). <a href="#" onclick="toggleSBHelp(); return false;" id="sb-help-toggle">Lihat cara mengaturnya ▾</a>
       </div>
       <div id="sb-help-box" style="display:none; font-size:12.5px; color:var(--ink-light); line-height:1.6; background:var(--paper); border:1px solid var(--line-soft); border-radius:8px; padding:10px 12px; margin-top:8px;">
         1. Buka <a href="https://supabase.com" target="_blank" rel="noopener">supabase.com</a>, buat akun &amp; project baru (gratis).<br>
@@ -557,8 +557,8 @@ create policy "own backup update" on public.backups for update using (auth.uid()
         </div>
         <div class="btn-row" style="margin-top:10px;">
           <button type="submit" class="btn btn-ghost" id="sb-connect-btn">🔗 Masuk / Daftar</button>
-          <button type="button" class="btn btn-primary" onclick="sbSave()">☁⬆ Simpan ke Supabase</button>
-          <button type="button" class="btn btn-ghost" onclick="sbLoad()">☁⬇ Muat dari Supabase</button>
+          <button type="button" class="btn btn-primary" onclick="sbSave()">☁⬆ Simpan ke Cloud</button>
+          <button type="button" class="btn btn-ghost" onclick="sbLoad()">☁⬇ Muat dari Cloud</button>
           <button type="button" class="btn btn-ghost" id="sb-logout-btn" onclick="sbLogout()" style="display:none;">Keluar</button>
         </div>
       </form>
