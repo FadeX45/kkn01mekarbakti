@@ -531,18 +531,7 @@ create policy "own backup select" on public.backups for select using (auth.uid()
 create policy "own backup insert" on public.backups for insert with check (auth.uid() = user_id);
 create policy "own backup update" on public.backups for update using (auth.uid() = user_id);</pre>
         3. Buka menu <b>Authentication → Providers → Email</b>, matikan "Confirm email" agar bisa langsung masuk tanpa verifikasi email (opsional, bisa dinyalakan lagi kapan saja).<br>
-        4. Buka menu <b>Project Settings → API</b>, salin <b>Project URL</b> dan <b>anon public key</b>, tempel di kolom bawah ini.<br>
-        5. Isi email &amp; kata sandi bebas (khusus untuk aplikasi ini), lalu klik "Masuk / Daftar". Data hanya bisa diakses oleh akun tersebut.
-      </div>
-      <div class="field-row" style="margin-top:12px;">
-        <div class="field" style="flex:2; min-width:220px;">
-          <label for="sb-url">Supabase Project URL</label>
-          <input type="text" id="sb-url" placeholder="https://xxxxxxxx.supabase.co">
-        </div>
-        <div class="field" style="flex:2; min-width:220px;">
-          <label for="sb-anon-key">Supabase Anon Key</label>
-          <input type="text" id="sb-anon-key" placeholder="eyJhbGciOi...">
-        </div>
+        4. Isi email &amp; kata sandi bebas (khusus untuk aplikasi ini), lalu klik "Masuk / Daftar". Data hanya bisa diakses oleh akun tersebut.
       </div>
       <form id="sb-auth-form" autocomplete="on" style="margin:0;">
         <div class="field-row" style="margin-top:8px;" id="sb-login-fields">
@@ -1190,6 +1179,8 @@ create policy "own backup update" on public.backups for update using (auth.uid()
 
   // ---------- Supabase Backup ----------
   var SB_TABLE = 'backups';
+  var SB_URL = 'https://ddwbadsaalesiccwfdun.supabase.co';
+  var SB_ANON_KEY = 'sb_publishable_qksBn4KhgqcqgsPYM16_iA_cdN5CLgg';
   var sbAccessToken = null;
   var sbRefreshToken = null;
   var sbUserId = null;
@@ -1203,13 +1194,7 @@ create policy "own backup update" on public.backups for update using (auth.uid()
   }
 
   function sbGetConfig(){
-    var urlInput = document.getElementById('sb-url');
-    var keyInput = document.getElementById('sb-anon-key');
-    var url = urlInput ? urlInput.value.trim().replace(/\/+$/, '') : '';
-    var key = keyInput ? keyInput.value.trim() : '';
-    if(url) localStorage.setItem('sb_url', url);
-    if(key) localStorage.setItem('sb_anon_key', key);
-    return { url: url || localStorage.getItem('sb_url') || '', key: key || localStorage.getItem('sb_anon_key') || '' };
+    return { url: SB_URL, key: SB_ANON_KEY };
   }
 
   function sbRestoreSession(){
@@ -1451,11 +1436,7 @@ create policy "own backup update" on public.backups for update using (auth.uid()
   renderHutang();
   renderRingkasan();
   (function(){
-    var savedUrl = localStorage.getItem('sb_url');
-    var savedKey = localStorage.getItem('sb_anon_key');
     var savedEmail = localStorage.getItem('sb_email');
-    if(savedUrl){ document.getElementById('sb-url').value = savedUrl; }
-    if(savedKey){ document.getElementById('sb-anon-key').value = savedKey; }
     if(savedEmail){ document.getElementById('sb-email').value = savedEmail; }
     sbRestoreSession();
     sbUpdateStatus(!!(sbAccessToken && sbUserId));
