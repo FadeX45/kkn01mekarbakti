@@ -342,7 +342,13 @@
     <ul id="due-alert-list" class="due-alert-list" style="display:none;"></ul>
   </div>
 </div>
-<audio src="lagu.mp3" autoplay controls loop></audio>
+<audio id="bgm" src="lagu.mp3" loop></audio>
+<script>
+  document.addEventListener('click', function once(){
+    document.getElementById('bgm').play();
+    document.removeEventListener('click', once);
+  });
+      </script>
 <main>
 
   <!-- KAS HARIAN -->
