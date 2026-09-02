@@ -1,6 +1,8 @@
-// Service worker sederhana: cache semua aset saat install,
-// lalu sajikan dari cache saat offline (cache-first).
-var CACHE_NAME = 'buku-kas-umkm-v4';
+// Service worker: cache semua aset saat install.
+// Halaman utama (index.html/navigasi) pakai strategi NETWORK-FIRST agar
+// setiap kali online selalu dapat versi terbaru; offline baru fallback ke cache.
+// Aset statis (manifest, ikon) tetap CACHE-FIRST karena jarang berubah.
+var CACHE_NAME = 'buku-kas-umkm-v5';
 var ASSETS = [
   './',
   './index.html',
@@ -34,6 +36,28 @@ self.addEventListener('fetch', function(event){
   // Jangan cache permintaan lintas domain (mis. Supabase Auth & REST API)
   // agar fitur cadangan Supabase selalu memakai data/izin terbaru.
   if(new URL(event.request.url).origin !== self.location.origin) return;
+
+  var isHTMLPage = event.request.mode === 'navigate' ||
+    (event.request.headers.get('accept') || '').indexOf('text/html') !== -1;
+
+  if(isHTMLPage){
+    // NETWORK-FIRST: selalu coba ambil index.html terbaru dari internet dulu.
+    // Kalau berhasil, perbarui cache. Kalau gagal (offline), baru pakai cache.
+    event.respondWith(
+      fetch(event.request).then(function(response){
+        var copy = response.clone();
+        caches.open(CACHE_NAME).then(function(cache){ cache.put(event.request, copy); });
+        return response;
+      }).catch(function(){
+        return caches.match(event.request).then(function(cached){
+          return cached || caches.match('./index.html');
+        });
+      })
+    );
+    return;
+  }
+
+  // CACHE-FIRST untuk aset statis (manifest, ikon, dll) yang jarang berubah.
   event.respondWith(
     caches.match(event.request).then(function(cached){
       if(cached) return cached;
